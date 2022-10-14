@@ -1,0 +1,196 @@
+class Student:
+    def __init__(self, name, surname, gender):
+        self.name = name
+        self.surname = surname
+        self.gender = gender
+        self.finished_courses = []
+        self.courses_in_progress = []
+        self.course = []
+        self.grades = {}
+
+    def rate_lecturer(self, lecturer, course, grade):
+        if isinstance(lecturer, Lecturer) and course in lecturer.courses_attached and course in self.courses_in_progress:
+            if course in lecturer.grades_1:
+                lecturer.grades_1[course] += [grade]
+            else:
+                lecturer.grades_1[course] = [grade]
+        else:
+            return 'Ошибка'
+
+    def _middle_grade(self):
+        total = 0
+        total_1 = []
+        for key, values in self.grades.items():
+            total_1 += values
+        for number in total_1:
+            total += number
+            lengf = len(total_1)
+            self._middl_grade = float(total / lengf)
+        return self._middl_grade
+
+    def __str__(self):
+        print("="*80)
+        return (f'Информация и студенте:\nИмя: {self.name}\n'
+                f'Фамилия: {self.surname}\n'f'Средняя оценка за домашние задания: {self._middle_grade()}\n'
+                f'Курсы в процессе изучения: {",".join(self.courses_in_progress)}\n'
+                f'Завершенные курсы: {",".join(self.finished_courses)}')
+
+    def __lt__(self, other):
+        if not isinstance(other, Student):
+            print('Невозможно сравнить!')
+            return
+        print(f'У студента {self.name} {self.surname} средний бал менше, '
+              f'чем студента {other.name} {other.surname}?')
+        return self._middle_grade() < other._middle_grade()
+
+
+class Mentor:
+    def __init__(self, name, surname):
+        self.name = name
+        self.surname = surname
+        self.courses_attached = []
+
+class Lecturer(Mentor):
+    def __init__(self, name, surname):
+        super().__init__(name, surname)
+        self.grades_1 = {}
+        self.lecturers = {}
+
+    def _middle_grade(self):
+        for key, values in self.grades_1.items():
+            total = 0
+            for number in values:
+                total += number
+                lengf = len(values)
+                self._middle_grade = float(total / lengf)
+        return self._middle_grade
+
+
+    def __str__(self):
+        print("="*80)
+        res = f'Информация о лекторе:\nИмя: {self.name}\nФамилия: {self.surname}\n' \
+              f'Средняя оценка за лекции: {self._middle_grade()} '
+        print()
+        return res
+
+    def __lt__(self, other):
+        if not isinstance(other, Lecturer):
+            print('Невозможно сравнить!')
+            return
+        if self._middle_grade < other._middle_grade == True:
+            print("="*80)
+            print(f'У преподавателя {self.name}  {self.surname} средний бал за лекции ниже,'
+                      f'чем у преподавателя {other.name}  {other.surname} ')
+        else:
+            print("="*80)
+            print(f'У преподавателя {self.name} {self.surname} средний бал за лекции ниже, '
+                    f'чем у преподавателя {other.name} {other.surname}?')
+        return self._middle_grade < other._middle_grade
+
+class Reviewer(Mentor):
+    def rate_hw(self, student, course, grade):
+        if isinstance(student, Student) and course in self.courses_attached and course in student.courses_in_progress:
+            if course in student.grades:
+                student.grades[course] += [grade]
+            else:
+                student.grades[course] = [grade]
+        else:
+            return 'Ошибка'
+
+    def __str__(self):
+        print("="*80)
+        res = f'Проверяющие преподаватели:\nИмя: {self.name}\nФамилия: {self.surname}'
+        return res
+
+Ivan = Student('Ivan', 'Ivanov', 'man')
+Ivan.finished_courses += ['Python']
+Ivan.courses_in_progress = ['Python', 'Git']
+
+Egor = Student('Egor', 'Igorevich', 'man')
+Egor.finished_courses += ['Python', 'C++']
+Egor.courses_in_progress = ['Python', 'Git']
+
+Elena = Student('Elena', 'Petrova', 'woman')
+Elena.finished_courses += ['Python']
+Elena.courses_in_progress = ['Python', 'C++', 'Git']
+
+Eva = Student('Eva', 'Anatolievna', 'woman')
+Eva.finished_courses += ['Python']
+Eva.courses_in_progress = ['Python', 'C++', 'Git']
+
+mentor_1 = Lecturer('Irina', 'Gerasimova')
+mentor_2 = Reviewer('Igor', 'Vasilevskii')
+mentor_3 = Lecturer('Nicolai', 'Nikolaevich')
+
+print()
+mentor_1.courses_attached += ['Python']
+mentor_2.courses_attached += ['Python', 'Git']
+mentor_3.courses_attached += ['Python', 'Git']
+
+Ivan.rate_lecturer(mentor_1, 'Python', 9)
+Elena.rate_lecturer(mentor_1, 'Python', 10)
+Ivan.rate_lecturer(mentor_3, 'Git', 7)
+Elena.rate_lecturer(mentor_3, 'Git', 8)
+Egor.rate_lecturer(mentor_1, 'Python', 9)
+
+mentor_2.rate_hw(Elena, 'Git', 8)
+mentor_2.rate_hw(Ivan, 'Git', 6)
+mentor_2.rate_hw(Eva, 'Git', 7)
+mentor_2.rate_hw(Eva, 'Python', 3)
+mentor_2.rate_hw(Ivan, 'Python', 9)
+mentor_2.rate_hw(Egor, 'Python', 7)
+
+print()
+print(mentor_2)
+print()
+print(Ivan)
+print(mentor_1)
+print()
+print(mentor_3)
+print()
+print(mentor_1 < mentor_3)
+print()
+print(Ivan < Eva)
+
+
+student_list = [Ivan.grades, Elena.grades, Egor.grades, Eva.grades ]
+lecturer_list = [mentor_1.grades_1, mentor_3.grades_1]
+courses = ['Python', 'C++', 'Git']
+
+def grade_av_student():
+    print("*"*80)
+    for course in courses:
+        assessment = []
+        for persone in student_list:
+            for key, values in persone.items():
+                if key == course:
+                    assessment += values
+
+        assessment_1 = assessment
+        total = 0
+        for number in assessment_1:
+            total += number
+            length = len(assessment_1)
+        middl_grade = round(float(total / length), 3)
+
+        print(f'Средняя оценка за домашние задания по всем студентам в рамках курса {course}: {middl_grade}')
+    print("="*80)
+
+grade_av_student()
+
+def grade_av_lecturer():
+    print("*"*80)
+    for course in courses:
+        for persone in lecturer_list:
+            for key, values in persone.items():
+                if key == course:
+                    total = 0
+                    for number in values:
+                        total += number
+                    length = len(values)
+                    middl_grade = round(float(total / length), 3)
+                    print(f'Средняя оценка за лекции всех лекторов в рамках курса  {course}: {middl_grade}')
+    print("="*80)
+
+
+grade_av_lecturer()
